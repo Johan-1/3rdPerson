@@ -10,14 +10,12 @@ public class PlayerController : MonoBehaviour
     Rigidbody _rigidbody;
     [SerializeField] float _moveSpeed = 5.0f;
 
-    [SerializeField] Camera _shoulderCamera;
-    [SerializeField] Transform _cameraLookPoint;
-    [SerializeField] float _cameraDistance = 1.0f;
-    [SerializeField] float _mouseSensitivityY = 2.0f;
-    [SerializeField] float _mouseSensitivityX = 0.2f;
 
-    [SerializeField] Vector2 _cameraRotationYMinMax = new Vector2(-20,30);
-    [SerializeField] Vector2 _cameraRotationXMinMax = new Vector2(-10,10);
+    [SerializeField] Camera _camera;
+    
+
+    
+    
 
     Vector3 _cameraRotation;
 
@@ -37,38 +35,43 @@ public class PlayerController : MonoBehaviour
         SetVelocity();
         SetRotations();
        
-        _shoulderCamera.transform.position = _cameraLookPoint.position -_shoulderCamera.transform.forward * _cameraDistance;
+        
 
-        _animator.SetFloat("VelocityZ", Input.GetAxisRaw("Vertical"));
-        _animator.SetFloat("VelocityX", Input.GetAxisRaw("Horizontal"));
+        
+        
     }
 
     void SetVelocity()
     {
+
+        // get forward direction based on camera
+        Vector3 camToPlayer = transform.position - new Vector3(_camera.transform.position.x, transform.position.y, _camera.transform.position.z);
+        camToPlayer.Normalize();
+
         //movement
-        _direction = transform.right * Input.GetAxisRaw("Horizontal") + transform.forward * Input.GetAxisRaw("Vertical");
+        _direction = _camera.transform.right * Input.GetAxisRaw("Horizontal") + camToPlayer  * Input.GetAxisRaw("Vertical");
         _direction.Normalize();
         _rigidbody.velocity = new Vector3(_direction.x * _moveSpeed, _rigidbody.velocity.y, _direction.z * _moveSpeed);
+
+        
+
+        // animation and forward facing
+        float moving = 0.0f;
+        if (_direction != Vector3.zero)
+        {
+            moving = 1.0f;
+            transform.forward = _direction;
+
+        }            
+        _animator.SetFloat("velocity", moving);
 
     }
 
     void SetRotations()
     {
-        //get y and x rotations and clamp to desired values, set the local rotation of shoulder camera
-        _cameraRotation.y += Input.GetAxisRaw("Mouse X") * _mouseSensitivityY;
-        _cameraRotation.x += Input.GetAxisRaw("Mouse Y") * _mouseSensitivityY;
 
-        _cameraRotation.y = Mathf.Clamp(_cameraRotation.y, _cameraRotationYMinMax.x, _cameraRotationYMinMax.y);
-        _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, _cameraRotationXMinMax.x, _cameraRotationXMinMax.y);
 
-        _shoulderCamera.transform.localRotation = Quaternion.Euler(_cameraRotation);
 
-        //if camera rotation is at clamped value start rotating player body aswell
-        if (_cameraRotation.y < _cameraRotationYMinMax.x + 1 || _cameraRotation.y > _cameraRotationYMinMax.y - 1)
-        {
-            _rotation.y += Input.GetAxisRaw("Mouse X") * _mouseSensitivityY;
-            transform.rotation = Quaternion.Euler(_rotation);
-        }              
     }
 
 
