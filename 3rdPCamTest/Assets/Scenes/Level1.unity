@@ -4512,8 +4512,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 467125781}
-  _cameraRotationXMinMax: {x: -80, y: 40}
-  _cameraDistanceMax: 1
+  _cameraRotationXMinMax: {x: -60, y: 40}
+  _cameraDistanceMax: 4
   _mouseSensitivityY: 2
   _mouseSensitivityX: 0.2
   _lerpSpeed: 0.5
@@ -6585,6 +6585,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveSpeed: 8
+  _rotationSpeed: 7
   _camera: {fileID: 1154544108}
 --- !u!1 &1919307856
 GameObject:

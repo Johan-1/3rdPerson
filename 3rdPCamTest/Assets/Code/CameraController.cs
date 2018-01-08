@@ -22,13 +22,18 @@ public class CameraController : MonoBehaviour
     float _lastRayHitPosition = 0.0f;
     float _lerpOutFraction = 0.0f;
 
-    
-    Vector3 _cameraRotation = new Vector3(0, 180, 0);
+
+    Vector3 _cameraRotation;
 
     void Awake()
     {
         _targetCameraDistance = _cameraDistanceMax;
-        _lastRayHitPosition = _cameraDistanceMax;                       
+        _lastRayHitPosition = _cameraDistanceMax;
+
+        _cameraRotation = _target.transform.rotation.eulerAngles;
+
+        
+        
     }
 
     void LateUpdate()
@@ -100,10 +105,12 @@ public class CameraController : MonoBehaviour
         _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, _cameraRotationXMinMax.x, _cameraRotationXMinMax.y);
 
         // set the position to the position of target and add the rotation multiplied by distance to make camera orbit around player
-        transform.position = _target.position + Quaternion.Euler(_cameraRotation) * new Vector3(0, 0, _targetCameraDistance);
+        transform.position = _target.position + Quaternion.Euler(_cameraRotation) * new Vector3(0, 0, -_targetCameraDistance);
 
         // last focus forward on player
-        transform.LookAt(_target.transform);
+        transform.LookAt(_target.transform);   
+        
+        
 
     }
 
