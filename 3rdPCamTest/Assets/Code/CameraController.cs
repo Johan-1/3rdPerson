@@ -15,13 +15,9 @@ public class CameraController : MonoBehaviour
 
     [SerializeField] Vector2 _stickSensitivity;
 
-    float _targetCameraDistance;
-
-    
-   
+    float _targetCameraDistance;  
     float _lastRayHitPosition = 0.0f;
     float _lerpOutFraction = 0.0f;
-
 
     Vector3 _cameraRotation;
 
@@ -30,10 +26,8 @@ public class CameraController : MonoBehaviour
         _targetCameraDistance = _cameraDistanceMax;
         _lastRayHitPosition = _cameraDistanceMax;
 
-        _cameraRotation = _target.transform.rotation.eulerAngles;
-
-        
-        
+        // set start rotation to same as player
+        _cameraRotation = _target.transform.rotation.eulerAngles;               
     }
 
     void LateUpdate()
