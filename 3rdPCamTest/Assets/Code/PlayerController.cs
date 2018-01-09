@@ -17,7 +17,10 @@ public class PlayerController : MonoBehaviour
     Quaternion _fromRotation;
     Quaternion _targetRotation;
 
-    float _slerpFraction;
+    
+    
+
+    float _lerpFraction;
     
 	void Start () 			
 	{
@@ -52,7 +55,7 @@ public class PlayerController : MonoBehaviour
             moving = 1.0f;
 
             // get the rotation based on our input vector 
-            _targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            _targetRotation = Quaternion.LookRotation(direction, Vector3.up);          
 
             // if vector was not the same as last frame we need to restart slerp
             if (_targetRotation != _lastRotation)
@@ -62,7 +65,7 @@ public class PlayerController : MonoBehaviour
                 // reset fraction to 0
                 _fromRotation = transform.rotation;
                 _lastRotation = _targetRotation;
-                _slerpFraction = 0.0f;
+                _lerpFraction = 0.0f;
             }
             
         }
@@ -70,29 +73,17 @@ public class PlayerController : MonoBehaviour
         // add on to fraction
         // our current rotation will be inbetween the rotation we had on last unique inputvector(fraction 0)
         // and the rotation we got from the inputvector(fraction 1)
-        _slerpFraction += Time.deltaTime * _rotationSpeed;
-        transform.rotation = Quaternion.Slerp(_fromRotation, _targetRotation,_slerpFraction);
-        
+        _lerpFraction += Time.deltaTime * _rotationSpeed;
+             
+        // lerp euler angles instead of quaternions to avoid undefined behaviour on 180 degree rotations
+        float yRotation = Mathf.LerpAngle(_fromRotation.eulerAngles.y, _targetRotation.eulerAngles.y, _lerpFraction);
+
+        transform.rotation = Quaternion.Euler(transform.rotation.x, yRotation, transform.rotation.z);
+
         _animator.SetFloat("velocity", moving);
+        
 
     }
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
