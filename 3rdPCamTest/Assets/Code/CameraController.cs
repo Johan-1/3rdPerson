@@ -6,25 +6,26 @@ public class CameraController : MonoBehaviour
 {
 
     [SerializeField] Transform _target;
-    [SerializeField] Vector2 _cameraRotationXMinMax = new Vector2(-10, 10);
 
-    [SerializeField] float _cameraDistanceMax = 1.0f;
-    [SerializeField] float _mouseSensitivityY = 2.0f;
-    [SerializeField] float _mouseSensitivityX = 0.2f;
+    [SerializeField] Vector3 _cameraDistanceMinMaxDesired; 
+    [SerializeField] Vector2 _cameraRotationXMinMax = new Vector2(-10, 10);            
+    [SerializeField] Vector2 _mouseSensitivityXY;
+    [SerializeField] Vector2 _stickSensitivityXY;
+
     [SerializeField] float _lerpSpeed = 0.5f;
-
-    [SerializeField] Vector2 _stickSensitivity;
+    [SerializeField] float _zoomSpeedMouseScroll;
+    [SerializeField] float _zoomSpeedController;
 
     float _targetCameraDistance;  
-    float _lastRayHitPosition = 0.0f;
+    float _lastRayHitLenght = 0.0f;
     float _lerpOutFraction = 0.0f;
 
     Vector3 _cameraRotation;
 
     void Awake()
     {
-        _targetCameraDistance = _cameraDistanceMax;
-        _lastRayHitPosition = _cameraDistanceMax;
+        _targetCameraDistance = _cameraDistanceMinMaxDesired.z;
+        _lastRayHitLenght = _cameraDistanceMinMaxDesired.z;
 
         // set start rotation to same as player
         _cameraRotation = _target.transform.rotation.eulerAngles;               
@@ -32,7 +33,9 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
-        MoveCamera();        
+
+        ZoomCamera();
+        MoveCamera();       
         CheckInterseption();        
     }
 
@@ -60,7 +63,7 @@ public class CameraController : MonoBehaviour
                 // set the LastRayHitLenght to the same value. we will start our out lerp from this value if we dont hit anything the next frame
                 // set lerp fraction to be 0 if anything is hit so lerp will restart from beginning
                 _targetCameraDistance = hit.distance + extraDistance;
-                _lastRayHitPosition = _targetCameraDistance;
+                _lastRayHitLenght = _targetCameraDistance;
                 _lerpOutFraction = 0;
 
                 hitCount++;
@@ -73,7 +76,7 @@ public class CameraController : MonoBehaviour
             
             _lerpOutFraction += Time.deltaTime * _lerpSpeed;
             _lerpOutFraction = Mathf.Clamp01(_lerpOutFraction);
-            _targetCameraDistance = Mathf.Lerp(_lastRayHitPosition, _cameraDistanceMax, _lerpOutFraction);
+            _targetCameraDistance = Mathf.Lerp(_lastRayHitLenght, _cameraDistanceMinMaxDesired.z, _lerpOutFraction);
         }
         
         // draw rays for debuging
@@ -82,18 +85,38 @@ public class CameraController : MonoBehaviour
         Debug.DrawRay(_target.position, targetToCameraFLR[2] * _targetCameraDistance, Color.cyan);        
 
     }
+
+    void ZoomCamera()
+    {
+        // only allow to zoom in/out if our camera is not colliding or is lerping from a collision
+        if (_lerpOutFraction != 1.0f)
+            return;
+       
+        // mouse scrollwheel
+        _cameraDistanceMinMaxDesired.z += Input.GetAxisRaw("ZoomMouse") * _zoomSpeedMouseScroll;
+
+        //Controller triggers
+        _cameraDistanceMinMaxDesired.z += Input.GetAxisRaw("ZoomController")  * _zoomSpeedController * Time.deltaTime;
+        
+        // clamp value to min/max
+        _cameraDistanceMinMaxDesired.z = Mathf.Clamp(_cameraDistanceMinMaxDesired.z, _cameraDistanceMinMaxDesired.x, _cameraDistanceMinMaxDesired.y);
+
+        // set target distance to new desired distance
+        _targetCameraDistance = _cameraDistanceMinMaxDesired.z;                         
+
+    }
        
 
     void MoveCamera()
     {
         
         // get mouse input and add to rotation
-        _cameraRotation.y += Input.GetAxisRaw("Mouse X") * _mouseSensitivityY;
-        _cameraRotation.x += Input.GetAxisRaw("Mouse Y") * _mouseSensitivityY;
+        _cameraRotation.y += Input.GetAxisRaw("Mouse X") * _mouseSensitivityXY.x;
+        _cameraRotation.x += Input.GetAxisRaw("Mouse Y") * _mouseSensitivityXY.y;
 
         // get right controllstick and add to rotation
-        _cameraRotation.y += Input.GetAxisRaw("RightStickX") * _stickSensitivity.x * Time.deltaTime;
-        _cameraRotation.x += Input.GetAxisRaw("RightStickY") * _stickSensitivity.y * Time.deltaTime;
+        _cameraRotation.y += Input.GetAxisRaw("RightStickX") * _stickSensitivityXY.x * Time.deltaTime;
+        _cameraRotation.x += Input.GetAxisRaw("RightStickY") * _stickSensitivityXY.y * Time.deltaTime;
 
         // clamp the x rotation of camera to avoid flipping
         _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, _cameraRotationXMinMax.x, _cameraRotationXMinMax.y);
@@ -103,9 +126,7 @@ public class CameraController : MonoBehaviour
 
         // last focus forward on player
         transform.LookAt(_target.transform);   
-        
-        
-
+               
     }
 
 }
