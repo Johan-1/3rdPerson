@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class PlayerController : MonoBehaviour 
+public class PlayerController : MonoBehaviour
 {
-        
+
     [SerializeField] float _moveSpeed = 5.0f;
     [SerializeField] float _rotationSpeed = 2.0f;
-    [SerializeField] Camera _camera;        
+    [SerializeField] Camera _camera;
+
+    public Camera getPlayerCamera{ get { return _camera; } }
     
     Rigidbody _rigidbody;
     Animator _animator;
@@ -17,7 +19,8 @@ public class PlayerController : MonoBehaviour
     Quaternion _fromRotation;
     Quaternion _targetRotation;
 
-    
+    bool _active = true;
+    public bool playerActive { set { _active = value; } }
     
 
     float _lerpFraction;
@@ -38,15 +41,27 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
+
+
         // get forward direction based on camera without the hight difference (dont want a forward leaning downwards/upwards)
         Vector3 camToPlayer = transform.position - new Vector3(_camera.transform.position.x, transform.position.y, _camera.transform.position.z);
         camToPlayer.Normalize();
 
         // get input direction based on the view from camera
-        Vector3 direction = ((_camera.transform.right * Input.GetAxisRaw("Horizontal")) + (camToPlayer  * Input.GetAxisRaw("Vertical"))).normalized;
+        Vector3 direction = ((_camera.transform.right * Input.GetAxisRaw("Horizontal")) + (camToPlayer * Input.GetAxisRaw("Vertical"))).normalized;
+
+        if (_active)
+        {
+            // set velocity keeping gravity
+            _rigidbody.velocity = new Vector3(direction.x * _moveSpeed, _rigidbody.velocity.y, direction.z * _moveSpeed);
+        }
+        else
+        {
+            direction = Vector3.zero;
+            _rigidbody.velocity = new Vector3(0, _rigidbody.velocity.y, 0);
+        }
+
         
-        // set velocity keeping gravity
-        _rigidbody.velocity = new Vector3(direction.x * _moveSpeed, _rigidbody.velocity.y, direction.z * _moveSpeed);
         
         // if we have input we will slerp our y rotation
         float moving = 0.0f; // temp for setting animation

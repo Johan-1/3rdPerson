@@ -22,6 +22,10 @@ public class CameraController : MonoBehaviour
 
     Vector3 _cameraRotation;
 
+
+    bool _haveControl = true;
+    public bool haveControl { set { _haveControl = value; } }
+
     void Awake()
     {
         _targetCameraDistance = _cameraDistanceMinMaxDesired.z;
@@ -33,6 +37,8 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
+        if (!_haveControl)
+            return;
 
         ZoomCamera();
         MoveCamera();       
