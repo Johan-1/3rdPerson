@@ -84,12 +84,14 @@ public class CameraController : MonoBehaviour
             _lerpOutFraction = Mathf.Clamp01(_lerpOutFraction);
             _targetCameraDistance = Mathf.Lerp(_lastRayHitLenght, _cameraDistanceMinMaxDesired.z, _lerpOutFraction);
         }
-        
+
+#if UNITY_EDITOR
+
         // draw rays for debuging
         Debug.DrawRay(_target.position, targetToCameraFLR[0] * _targetCameraDistance, Color.cyan);
         Debug.DrawRay(_target.position, targetToCameraFLR[1] * _targetCameraDistance, Color.cyan);
         Debug.DrawRay(_target.position, targetToCameraFLR[2] * _targetCameraDistance, Color.cyan);        
-
+#endif
     }
 
     void ZoomCamera()
