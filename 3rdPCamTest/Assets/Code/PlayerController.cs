@@ -81,7 +81,7 @@ public class PlayerController : MonoBehaviour
              
         // lerp euler angles instead of quaternions to avoid undefined behaviour on 180 degree rotations
         float yRotation = Mathf.LerpAngle(_fromRotation.eulerAngles.y, _targetRotation.eulerAngles.y, _lerpFraction);
-        transform.rotation = Quaternion.Euler(transform.rotation.x, yRotation, transform.rotation.z);
+        _rigidbody.MoveRotation(Quaternion.Euler(transform.rotation.x, yRotation, transform.rotation.z));
 
         _animator.SetFloat("velocity", moving);
         
